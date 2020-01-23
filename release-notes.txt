@@ -1,0 +1,1 @@
+* fix: address wrong content type reference when looking up Target post IDs (Thanks Abdessamad S.)
