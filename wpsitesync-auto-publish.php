@@ -5,7 +5,7 @@ Plugin URI: https://wpsitesync.com
 Description: Works with <a href="/wp-admin/plugin-install.php?tab=search&s=wpsitesync">WPSiteSync for Content</a> to automatically synchronizes Content to Target site when it's Published.
 Author: WPSiteSync
 Author URI: https://wpsitesync.com
-Version: 1.0
+Version: 1.1
 Text Domain: wpsitesync-auto-publish
 Domain path: /language
 
@@ -22,7 +22,7 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 		private static $_instance = NULL;
 
 		const PLUGIN_NAME = 'WPSiteSync for Auto Publish';
-		const PLUGIN_VERSION = '1.0';
+		const PLUGIN_VERSION = '1.1';
 
 		const META_KEY = 'spectrom_sync_auto_publish_msg_';
 
@@ -47,10 +47,19 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 		 */
 		public function init()
 		{
-SyncDebug::log(__METHOD__.'()');
+//SyncDebug::log(__METHOD__.'()');
 			if (1 === SyncOptions::get_int('auth', 0))
 				add_action('transition_post_status', array($this, 'transition_post'), 10, 3);
 			add_action('admin_notices', array($this, 'admin_notice'));
+			add_action('spectrom_sync_metabox_after_button', array($this, 'output_metabox_message'));
+		}
+
+		/**
+		 * Outputs a message in the WPSiteSync metabox informing user that Auto Sync is active
+		 */
+		public function output_metabox_message()
+		{
+			echo '<div style="margin-top:5px">* ', __('Auto Publish currently activated.', 'wpsitesync-auto-sync'), '</div>';
 		}
 
 		/**
@@ -91,7 +100,7 @@ SyncDebug::log(__METHOD__.'()');
 SyncDebug::log(__METHOD__.'():' . __LINE__ . ' post id: ' . $post_id . ' post type: ' . $post_type);
 				if (0 !== $post_id && in_array($post_type, apply_filters('spectrom_sync_allowed_post_types', array('post', 'page')))) {
 					$sync_model = new SyncModel();
-					$sync_data = $sync_model->get_sync_data($post_id, NULL, $post->post_type);
+					$sync_data = $sync_model->get_sync_data($post_id, NULL, 'post'/*$post->post_type*/);
 SyncDebug::log(__METHOD__.'():' . __LINE__ . ' sync data: ' . var_export($sync_data, TRUE));
 					if (NULL === $sync_data) {
 						// post has not yet been pushed - push it
