@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: WPSiteSync for Auto Publish
 Plugin URI: https://wpsitesync.com
@@ -51,7 +52,7 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 			if (1 === SyncOptions::get_int('auth', 0))
 				add_action('transition_post_status', array($this, 'transition_post'), 10, 3);
 			add_action('admin_notices', array($this, 'admin_notice'));
-			add_action('spectrom_sync_metabox_after_button', array($this, 'output_metabox_message'));
+			add_action('spectrom_sync_metabox_after_button', array($this, 'output_metabox_message'), 100);
 		}
 
 		/**
@@ -59,7 +60,7 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 		 */
 		public function output_metabox_message()
 		{
-			echo '<div style="margin-top:5px">* ', __('Auto Publish currently activated.', 'wpsitesync-auto-sync'), '</div>';
+			echo '<div style="margin-top:5px">* ', __('Auto Publish currently activated.', 'wpsitesync-auto-publish'), '</div>';
 		}
 
 		/**
@@ -80,9 +81,10 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 			$install = admin_url('plugin-install.php?tab=search&s=wpsitesync');
 			$activate = admin_url('plugins.php');
 			echo '<div class="notice notice-warning">';
-			echo	'<p>', sprintf(__('The <em>WPSiteSync for Auto Publish</em> plugin requires the main <em>WPSiteSync for Content</em> plugin to be installed and activated. Please %1$sclick here</a> or %2$sclick here</a> to activate.', 'wpsitesync-auto-publish'),
-						'<a href="' . $install . '">',
-						'<a href="' . $activate . '">'), '</p>';
+			echo '<p>', sprintf(__('The <em>WPSiteSync for Auto Publish</em> plugin requires the main <em>WPSiteSync for Content</em> plugin to be installed and activated. Please %1$sclick here</a> or %2$sclick here</a> to activate.', 'wpsitesync-auto-publish'),
+							'<a href="' . $install . '">',
+							'<a href="' . $activate . '">'),
+				'</p>';
 			echo '</div>';
 		}
 
@@ -97,20 +99,22 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 			if ('publish' === $new_status) {
 				$post_id = abs($post->ID);
 				$post_type = $post->post_type;
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' post id: ' . $post_id . ' post type: ' . $post_type);
-				if (0 !== $post_id && in_array($post_type, apply_filters('spectrom_sync_allowed_post_types', array('post', 'page')))) {
+SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' post id: ' . $post_id . ' post type: ' . $post_type);
+				$allowed = apply_filters('spectrom_sync_allowed_post_types', array('post', 'page'));
+SyncDebug::log(__METHOD__.'():' . __LINE__ . ' allowed post types: ' . var_export($allowed, TRUE));
+				if (0 !== $post_id && in_array($post_type, $allowed)) {
 					$sync_model = new SyncModel();
-					$sync_data = $sync_model->get_sync_data($post_id, NULL, 'post'/*$post->post_type*/);
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' sync data: ' . var_export($sync_data, TRUE));
+					$sync_data = $sync_model->get_sync_data($post_id, NULL, 'post'/* $post->post_type */);
+//SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' sync data: ' . var_export($sync_data, TRUE));
 					if (NULL === $sync_data) {
 						// post has not yet been pushed - push it
 						$api = new SyncApiRequest();
 						$api_response = $api->api('push', array('post_id' => $post_id));
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' api response: ' . var_export($api_response, TRUE));
+//SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' api response: ' . var_export($api_response, TRUE));
 						$user_id = get_current_user_id();
 						$key = self::META_KEY . $user_id;
 						$code = $api_response->get_error_code();
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' error code: ' . $code);
+SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' error code: ' . $code);
 						add_user_meta($user_id, $key, $code, TRUE);
 					}
 				} // post_id && post_type
@@ -124,9 +128,9 @@ SyncDebug::log(__METHOD__.'():' . __LINE__ . ' error code: ' . $code);
 		{
 			$user_id = get_current_user_id();
 			$key = self::META_KEY . $user_id;
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' key=' . $key);
+SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' key=' . $key);
 			$data = get_user_meta($user_id, $key, TRUE);
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' data: ' . var_export($data, TRUE));
+SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' data: ' . var_export($data, TRUE));
 			delete_user_meta($user_id, $key);
 			if ('' !== $data) {
 				$code = abs($data);
@@ -136,10 +140,10 @@ SyncDebug::log(__METHOD__.'():' . __LINE__ . ' data: ' . var_export($data, TRUE)
 				} else {
 					$class = 'notice-error';
 					$err_msg = SyncApiRequest::error_code_to_string($code);
-					$msg = sprintf(__('<em>WPSiteSync</em> encountered an error while Pushing this post to Target: %1$s', 'wpsitesync-auto-publish'),
+					$msg = sprintf(__('<em>WPSiteSync</em> encountered an error while Pushing this Content to Target: %1$s', 'wpsitesync-auto-publish'),
 						$err_msg);
 				}
-SyncDebug::log(__METHOD__.'():' . __LINE__ . ' msg: ' . $msg);
+SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' msg: ' . $msg);
 				echo '<div class="notice ', $class, ' is-dismissible">';
 				echo '<p>', $msg, '</p>';
 				echo '</div>';
