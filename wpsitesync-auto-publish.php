@@ -70,6 +70,7 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 		{
 			if (is_admin() && !class_exists('WPSiteSyncContent', FALSE) && current_user_can('activate_plugins')) {
 				add_action('admin_notices', array($this, 'notice_requires_wpss'));
+				add_action('admin_init', array($this, 'disable_plugin'));
 			}
 		}
 
@@ -86,6 +87,14 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 							'<a href="' . $activate . '">'),
 				'</p>';
 			echo '</div>';
+		}
+
+		/**
+		 * Disables the plugin if WPSiteSync not installed or ACF is too old
+		 */
+		public function disable_plugin()
+		{
+			deactivate_plugins(plugin_basename(__FILE__));
 		}
 
 		/**
