@@ -120,11 +120,20 @@ SyncDebug::log(__METHOD__.'():' . __LINE__ . ' allowed post types: ' . var_expor
 						$api = new SyncApiRequest();
 						$api_response = $api->api('push', array('post_id' => $post_id));
 //SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' api response: ' . var_export($api_response, TRUE));
-						$user_id = get_current_user_id();
-						$key = self::META_KEY . $user_id;
-						$code = $api_response->get_error_code();
+
+						// check to see if this is in response to a WPSiteSync API operation #4
+						$api_controller = SyncApiController::get_instance();
+						// if this is NULL, we're not handling a WPSiteSync API request
+						$version = $api_controller->get_header(SyncApiHeaders::HEADER_SYNC_VERSION);
+
+						// only write the error message if we're NOT processing a WPSiteSync API request
+						if (NULL === $version) {
+							$user_id = get_current_user_id();
+							$key = self::META_KEY . $user_id;
+							$code = $api_response->get_error_code();
 SyncDebug::log(__METHOD__ . '():' . __LINE__ . ' error code: ' . $code);
-						add_user_meta($user_id, $key, $code, TRUE);
+							add_user_meta($user_id, $key, $code, TRUE);
+						}
 					}
 				} // post_id && post_type
 			} // 'publish' === $new_status

@@ -1,1 +1,2 @@
-* fix: address wrong content type reference when looking up Target post IDs (Thanks Abdessamad S.)
+* fix: Address wrong content type reference when looking up Target post IDs (Thanks Abdessamad S.)
+* fix: Remove extra error reporting on Target site after Push.
