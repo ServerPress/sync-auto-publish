@@ -1,2 +1,6 @@
 * fix: Address wrong content type reference when looking up Target post IDs (Thanks Abdessamad S.)
 * fix: Remove extra error reporting on Target site after Push.
+* fix: Adjust content type reference in database storage.
+* enhancement: Check for presense of WPSiteSync and disable plugin if not found.
+* enhancement: Move the "Auto Publish is active" message in metabox below both Push and Pull buttons.
+* enhancement: Update .htaccess rules for Apache 2.4.

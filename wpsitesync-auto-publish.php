@@ -6,7 +6,7 @@ Plugin URI: https://wpsitesync.com
 Description: Works with <a href="/wp-admin/plugin-install.php?tab=search&s=wpsitesync">WPSiteSync for Content</a> to automatically synchronizes Content to Target site when it's Published.
 Author: WPSiteSync
 Author URI: https://wpsitesync.com
-Version: 1.1
+Version: 1.2
 Text Domain: wpsitesync-auto-publish
 Domain path: /language
 
@@ -23,7 +23,7 @@ if (!class_exists('WPSiteSync_Auto_Publish', FALSE)) {
 		private static $_instance = NULL;
 
 		const PLUGIN_NAME = 'WPSiteSync for Auto Publish';
-		const PLUGIN_VERSION = '1.1';
+		const PLUGIN_VERSION = '1.2';
 
 		const META_KEY = 'spectrom_sync_auto_publish_msg_';
 
